@@ -5,11 +5,12 @@ import (
 	"strings"
 )
 
+const PieceLen = 57
+
 type Piece struct {
 	Camp  *PieceCamp
 	Cate  *PieceCate
 	Point *Point
-	Dead  bool
 }
 
 func (p *Piece) Code() string {
@@ -24,7 +25,7 @@ func (p *Piece) String() string {
 	return p.Camp.Prefix + p.Cate.Name
 }
 
-func (p *Piece) DefaultImagePath() string {
+func (p *Piece) ImagePath() string {
 	return fmt.Sprintf("asset/image/chess/%s%s.GIF", p.Camp.Code, p.Cate.Code)
 }
 

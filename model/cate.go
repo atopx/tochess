@@ -7,11 +7,11 @@ type PieceCate struct {
 }
 
 var (
-	PiaceR = &PieceCate{Code: "R", Name: "车"}
-	PiaceN = &PieceCate{Code: "N", Name: "马"}
-	PiaceB = &PieceCate{Code: "B", Name: "象"}
-	PiaceA = &PieceCate{Code: "A", Name: "士"}
-	PiaceK = &PieceCate{Code: "K", Name: "将"}
-	PiaceC = &PieceCate{Code: "C", Name: "炮"}
-	PiaceP = &PieceCate{Code: "P", Name: "兵"}
+	PieceR = &PieceCate{Code: "R", Name: "车"}
+	PieceN = &PieceCate{Code: "N", Name: "马"}
+	PieceB = &PieceCate{Code: "B", Name: "象"}
+	PieceA = &PieceCate{Code: "A", Name: "士"}
+	PieceK = &PieceCate{Code: "K", Name: "将"}
+	PieceC = &PieceCate{Code: "C", Name: "炮"}
+	PieceP = &PieceCate{Code: "P", Name: "兵"}
 )

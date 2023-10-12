@@ -1,3 +1,3 @@
 package model
 
-type Point struct{ X, Y uint8 }
+type Point struct{ Row, Col int }
