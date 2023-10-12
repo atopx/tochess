@@ -112,8 +112,8 @@ class Chessman(object):
             if self.in_moving_list(col_num, row_num):
                 return self.move(col_num, row_num)
             print("the worng target_position:", self.name_cn, col_num, row_num)
-            for point in self.moving_list:
-                print(point.x, point.y)
+            for Point in self.moving_list:
+                print(Point.x, Point.y)
             return False
 
     def test_move(self, col_num, row_num):
@@ -126,8 +126,8 @@ class Chessman(object):
             return False
 
     def in_moving_list(self, col_num, row_num):
-        for point in self.__moving_list:
-            if point.x == col_num and point.y == row_num:
+        for Point in self.__moving_list:
+            if Point.x == col_num and Point.y == row_num:
                 return True
         return False
 
@@ -156,12 +156,12 @@ class Chessman(object):
                     Point(i, direction_parallel_coordinate) if h_or_v else Point(direction_parallel_coordinate, i))
 
     def add_from_probable_points(self, probable_moving_points, current_color):
-        for point in probable_moving_points:
-            if self.border_check(point.x, point.y):
+        for Point in probable_moving_points:
+            if self.border_check(Point.x, Point.y):
                 chessman = self.chessboard.get_chessman(
-                    point.x, point.y)
+                    Point.x, Point.y)
                 if chessman is None or chessman.is_red != current_color:
-                    self.moving_list.append(point)
+                    self.moving_list.append(Point)
 
 
 class Rook(Chessman):
@@ -218,21 +218,21 @@ class Knight(Chessman):
         creat_points(probable_obstacle_points, vs1, hs1)
         creat_points(probable_obstacle_points, vs2, hs2)
         current_color = super(Knight, self).is_red
-        for point in probable_obstacle_points:
-            if super(Knight, self).border_check(point.x, point.y):
+        for Point in probable_obstacle_points:
+            if super(Knight, self).border_check(Point.x, Point.y):
                 chessman = super(Knight, self).chessboard.get_chessman(
-                    point.x, point.y)
+                    Point.x, Point.y)
                 if chessman is None:
-                    if point.x == current_v_c:
+                    if Point.x == current_v_c:
                         probable_moving_points.append(
-                            Point(point.x + 1, 2 * point.y - current_h_c))
+                            Point(Point.x + 1, 2 * Point.y - current_h_c))
                         probable_moving_points.append(
-                            Point(point.x - 1, 2 * point.y - current_h_c))
+                            Point(Point.x - 1, 2 * Point.y - current_h_c))
                     else:
                         probable_moving_points.append(
-                            Point(2 * point.x - current_v_c, point.y + 1))
+                            Point(2 * Point.x - current_v_c, Point.y + 1))
                         probable_moving_points.append(
-                            Point(2 * point.x - current_v_c, point.y - 1))
+                            Point(2 * Point.x - current_v_c, Point.y - 1))
         super(Knight, self).add_from_probable_points(
             probable_moving_points, current_color)
 
@@ -343,13 +343,13 @@ class Elephant(Chessman):
         hs1 = (current_h_c + 1, current_h_c - 1)
         creat_points(probable_obstacle_points, vs1, hs1)
         current_color = super(Elephant, self).is_red
-        for point in probable_obstacle_points:
-            if super(Elephant, self).border_check(point.x, point.y):
+        for Point in probable_obstacle_points:
+            if super(Elephant, self).border_check(Point.x, Point.y):
                 chessman = super(Elephant, self).chessboard.get_chessman(
-                    point.x, point.y)
+                    Point.x, Point.y)
                 if chessman is None:
                     probable_moving_points.append(
-                        Point(2 * point.x - current_v_c, 2 * point.y - current_h_c))
+                        Point(2 * Point.x - current_v_c, 2 * Point.y - current_h_c))
         super(Elephant, self).add_from_probable_points(
             probable_moving_points, current_color)
 

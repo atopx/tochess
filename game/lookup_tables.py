@@ -51,7 +51,6 @@ Winner = Enum("Winner", "red black draw")
 
 
 def flip_move(x):
-    new = ''
     new = ''.join([new, str(8 - int(x[0]))])
     new = ''.join([new, str(9 - int(x[1]))])
     new = ''.join([new, str(8 - int(x[2]))])
