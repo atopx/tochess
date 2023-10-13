@@ -6,14 +6,12 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
-	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 	"tochess/asset/sound"
@@ -24,26 +22,16 @@ const (
 	AuditSampleRate = 48000
 )
 
-var (
-	MusicBg      *mp3.Stream
-	MusicCapture *mp3.Stream
-	MusicClick   *mp3.Stream
-	MusicCheck   *mp3.Stream
-	MusicDraw    *mp3.Stream
-	MusicInvalid *mp3.Stream
-	MusicLose    *mp3.Stream
-	MusicWin     *mp3.Stream
-)
-
 type Game struct {
-	Players       [2]*model.Player
-	Board         [10][9]*model.Piece
-	SelectPoint   *model.Point
-	IsGameOver    bool // 游戏是否结束
-	Audio         *audio.Context
-	rounds        int // 当前回合数
-	withoutEatNum int // 连续没有吃子的步数
-	CurrentCamp   *model.PieceCamp
+	Players           [2]*model.Player
+	Board             [10][9]*model.Piece
+	SelectPoint       *model.Point
+	IsGameOver        bool // 游戏是否结束
+	Audio             *audio.Context
+	Rounds            int // 当前回合数
+	MoveNum           int // 行棋步数
+	WithoutEatMoveNum int // 连续没有吃子的步数
+	CurrentCamp       *model.PieceCamp
 }
 
 func (g *Game) toFen() string {
@@ -74,9 +62,9 @@ func (g *Game) toFen() string {
 	fen.WriteString(" ")
 	fen.WriteString(strings.ToLower(g.CurrentCamp.Code)) // 行棋阵营
 	fen.WriteString(" - - ")
-	fen.WriteString(strconv.Itoa(g.withoutEatNum))
+	fen.WriteString(strconv.Itoa(g.WithoutEatMoveNum))
 	fen.WriteString(" ")
-	fen.WriteString(strconv.Itoa(g.rounds)) // 回合数
+	fen.WriteString(strconv.Itoa(g.Rounds)) // 回合数
 	return fen.String()
 }
 
@@ -85,22 +73,26 @@ func (g *Game) fromFen(fen string) (err error) {
 	if len(fens) != 6 {
 		return errors.New("invalid fen, it should be divided into 6 parts of data")
 	}
-	// 回合数
-	g.rounds, err = strconv.Atoi(fens[5])
-	if err != nil {
-		return errors.New("invalid fen, rounds is a int")
-	}
-	// 没有行棋的步数
-	g.withoutEatNum, err = strconv.Atoi(fens[4])
-	if err != nil {
-		return errors.New("invalid fen, without eating number is a int")
-	}
+
 	// 阵营
 	if strings.ToLower(fens[1]) == "b" {
 		g.CurrentCamp = model.Black
 	} else {
 		g.CurrentCamp = model.Red
 	}
+
+	// 没有行棋的步数
+	g.WithoutEatMoveNum, err = strconv.Atoi(fens[4])
+	if err != nil {
+		return errors.New("invalid fen, without eating number is a int")
+	}
+
+	// 回合数
+	g.Rounds, err = strconv.Atoi(fens[5])
+	if err != nil {
+		return errors.New("invalid fen, rounds is a int")
+	}
+
 	// 棋盘
 	rows := strings.Split(fens[0], "/")
 	if len(rows) != 10 {
@@ -133,17 +125,15 @@ func NewGame() *Game {
 		IsGameOver:  false,
 		Audio:       audio.NewContext(AuditSampleRate),
 		CurrentCamp: model.Red,
-		rounds:      1,
+		Rounds:      1,
 	}
 	return g
 }
 
 func (g *Game) init() {
-	var err error
-	MusicClick, err = mp3.DecodeWithoutResampling(bytes.NewReader(sound.Click))
-	if err != nil {
-		panic(err)
-	}
+
+	// 加载声音
+	sound.Init(g.Audio)
 
 	// 黑色方
 	g.Board[0][0] = model.BlackR
@@ -181,7 +171,6 @@ func (g *Game) init() {
 	g.Board[6][6] = model.RedP
 	g.Board[6][8] = model.RedP
 	fmt.Println(g.toFen())
-	os.Exit(0)
 }
 
 func (g *Game) position(row, col int) model.Position {
@@ -189,6 +178,14 @@ func (g *Game) position(row, col int) model.Position {
 		X: model.BroadPosition.X + float64(col*model.PieceLen),
 		Y: model.BroadPosition.Y + float64(row*model.PieceLen),
 	}
+}
+
+func (g *Game) getBoardPiece(point *model.Point) *model.Piece {
+	return g.Board[point.Row][point.Col]
+}
+
+func (g *Game) setBoardPiece(point *model.Point, piece *model.Piece) {
+	g.Board[point.Row][point.Col] = piece
 }
 
 func (g *Game) selected(x, y float64) *model.Point {
@@ -204,32 +201,65 @@ func (g *Game) selected(x, y float64) *model.Point {
 func (g *Game) Update() error {
 	// TODO 动画处理
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+
 		if g.SelectPoint != nil {
+
 			// 落子
 			x, y := ebiten.CursorPosition()
 			target := g.selected(float64(x), float64(y))
-			if target != nil {
-				// TODO 计算是否可以行子
+			piece := g.getBoardPiece(g.SelectPoint) // 原位置的棋子
+			if target != nil && piece != nil {
+				targetPiece := g.getBoardPiece(target) // 目标位置棋子
 
-				// 如果不可以, 提示音效, 跳过行棋
-
-				// 行棋
-				piece := g.Board[g.SelectPoint.Row][g.SelectPoint.Col]
-				g.Board[g.SelectPoint.Row][g.SelectPoint.Col] = nil
-				g.Board[target.Row][target.Col] = piece
-				music, err := g.Audio.NewPlayer(MusicClick)
-				if err != nil {
-					panic(err)
+				// 如果选择的棋子和当前游标相同, 则取消选择
+				if g.SelectPoint.Equal(target) {
+					g.SelectPoint = nil
+					return nil
 				}
-				music.Play()
+
+				// TODO 计算是否可以行子
+				if targetPiece != nil && targetPiece.Camp == piece.Camp {
+					// 不能吃自己的棋子
+					sound.Play(sound.MusicInvalid)
+					return nil
+				}
+
+				g.setBoardPiece(g.SelectPoint, nil) // 设置原位置为空
+				g.setBoardPiece(target, piece)      // 设置新位置为选择的棋子
+
+				if targetPiece != nil {
+					// 吃子
+					sound.Play(sound.MusicCapture)
+					g.WithoutEatMoveNum = 0
+				} else {
+					// 非吃子
+					g.WithoutEatMoveNum++
+					sound.Play(sound.MusicMove)
+				}
+
+				g.MoveNum++ // 行棋步数+1
+
+				// 交换行棋方
+				switch g.CurrentCamp {
+				case model.Red:
+					g.CurrentCamp = model.Black
+					if g.MoveNum > 1 {
+						// 非首次行棋且是红色方行棋，回合数+1
+						g.Rounds++
+					}
+				case model.Black:
+					g.CurrentCamp = model.Red
+				}
+				fmt.Println(g.toFen())
 			}
-			//MusicClick.
-			g.SelectPoint = nil
+			g.SelectPoint = nil // 行棋后清空选择棋子
 		} else {
 			// 选子
 			x, y := ebiten.CursorPosition()
 			g.SelectPoint = g.selected(float64(x), float64(y))
-
+			if g.SelectPoint != nil && g.getBoardPiece(g.SelectPoint) != nil {
+				sound.Play(sound.MusicClick)
+			}
 		}
 	}
 	return nil
