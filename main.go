@@ -104,7 +104,7 @@ func (g *Game) fromFen(fen string) (err error) {
 			code := string(code)
 			num, err := strconv.Atoi(code)
 			if err != nil {
-				if piece, ok := model.PieceMap[code]; ok {
+				if piece := model.GetPieceByCode(code); piece != nil {
 					g.Board[row][col] = piece
 					col++
 				} else {

@@ -74,4 +74,6 @@ func (p *Piece) Copy() *Piece {
 	}
 }
 
-func GetPieceByCode(code string) {}
+func GetPieceByCode(code string) *Piece {
+	return PieceMap[code]
+}
