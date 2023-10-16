@@ -18,10 +18,6 @@ import (
 	"tochess/model"
 )
 
-const (
-	AuditSampleRate = 48000
-)
-
 type Game struct {
 	Players           [2]*model.Player
 	Board             [10][9]*model.Piece
@@ -50,9 +46,7 @@ func (g *Game) toFen() string {
 				fen.WriteString(piece.Code())
 			}
 		}
-		if emptySeries == 9 {
-			fen.WriteString("9")
-		} else if emptySeries > 0 {
+		if emptySeries > 0 {
 			fen.WriteString(strconv.Itoa(emptySeries))
 		}
 		rows = append(rows, fen.String())
@@ -123,7 +117,7 @@ func NewGame() *Game {
 		Players:     [2]*model.Player{},
 		Board:       [10][9]*model.Piece{},
 		IsGameOver:  false,
-		Audio:       audio.NewContext(AuditSampleRate),
+		Audio:       audio.NewContext(48000),
 		CurrentCamp: model.Red,
 		Rounds:      1,
 	}
@@ -201,12 +195,10 @@ func (g *Game) selected(x, y float64) *model.Point {
 func (g *Game) Update() error {
 	// TODO 动画处理
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-
+		x, y := ebiten.CursorPosition()
+		target := g.selected(float64(x), float64(y))
 		if g.SelectPoint != nil {
-
 			// 落子
-			x, y := ebiten.CursorPosition()
-			target := g.selected(float64(x), float64(y))
 			piece := g.getBoardPiece(g.SelectPoint) // 原位置的棋子
 			if target != nil && piece != nil {
 				targetPiece := g.getBoardPiece(target) // 目标位置棋子
@@ -255,9 +247,8 @@ func (g *Game) Update() error {
 			g.SelectPoint = nil // 行棋后清空选择棋子
 		} else {
 			// 选子
-			x, y := ebiten.CursorPosition()
-			g.SelectPoint = g.selected(float64(x), float64(y))
-			if g.SelectPoint != nil && g.getBoardPiece(g.SelectPoint) != nil {
+			if target != nil && g.getBoardPiece(target) != nil {
+				g.SelectPoint = target
 				sound.Play(sound.MusicClick)
 			}
 		}
