@@ -21,7 +21,7 @@ fn mp3_loader(bytes: &[u8], _: Cow<str>) -> AudioSource {
 fn image_loader(bytes: &[u8], _: Cow<str>) -> Image {
     let mut image = Image::from_buffer(
         bytes,
-        ImageType::Extension("Gif"),
+        ImageType::Extension("png"),
         CompressedImageFormats::NONE,
         true,
     )
@@ -45,7 +45,7 @@ pub const CLICK_SOUND_HANDLE: HandleUntyped =
 impl Plugin for AssetPlugin {
     fn build(&self, app: &mut App) {
         load_internal_binary_asset!(app, FONT_HANDLE, "font/wenkai.ttf", font_loader);
-        load_internal_binary_asset!(app, PIECE_HANDLE, "image/background.gif", image_loader);
+        load_internal_binary_asset!(app, PIECE_HANDLE, "image/background.png", image_loader);
         load_internal_binary_asset!(app, CLICK_SOUND_HANDLE, "sound/click.mp3", mp3_loader);
     }
 }
