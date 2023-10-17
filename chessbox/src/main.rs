@@ -1,47 +1,67 @@
-use bevy::{prelude::{App, Camera2dBundle, Commands, default, DefaultPlugins, Msaa, PluginGroup, ResMut, Update}, window::{PresentMode, Window, WindowPlugin}};
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
-use bevy::app::AppExit;
-use bevy::prelude::EventWriter;
+use bevy::{math::Vec3Swizzles, prelude::*, sprite::collide_aabb::collide, utils::HashSet};
 
-fn exit_system(mut exit: EventWriter<AppExit>) {
-    exit.send(AppExit);
-}
 
-use asset::AssetPlugin;
-use components::GameTimers;
-use asset::PIECE_HANDLE;
+mod component;
+mod resource;
 
-mod components;
-mod asset;
 
 fn main() {
+    // add_startup_system 启动生命周期时只运行一次 ，
+    // add_system 每帧都会被调用方法
     App::new()
+        .add_state::<resource::GameState>()
+        .insert_resource(ClearColor(Color::rgb(210., 210., 210.)))
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "中国象棋".into(),
-                resolution: (800., 800.).into(),
-                present_mode: PresentMode::AutoVsync,
-                fit_canvas_to_parent: true,
-                prevent_default_event_handling: false,
-                ..default()
+                resolution: (1000., 700.).into(),
+                // position: WindowPosition::At(IVec2::new(2282, 0)),
+                ..Window::default()
             }),
-            ..default()
+            ..WindowPlugin::default()
         }))
-        .add_plugins(LogDiagnosticsPlugin::default())
-        .add_plugins(FrameTimeDiagnosticsPlugin::default())
-        .add_plugins(AssetPlugin)
-        .insert_resource(Msaa::Sample8)
-        .init_resource::<GameTimers>()
-        .add_systems(Update, hello_world_system)
+        .add_systems(Startup, setup_system)
         .run();
 }
 
-fn setup_camera(mut commands: Commands, mut countdown: ResMut<GameTimers>) {
+fn setup_system(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut windows: Query<&mut Window>,
+) {
+    // 创建2d镜头
     commands.spawn(Camera2dBundle::default());
-    countdown.black.pause();
-}
 
-fn hello_world_system() {
-    println!("{} {}", PIECE_HANDLE.is_weak(), PIECE_HANDLE.is_strong());
-    println!("hello world");
+    // 获取当前窗口
+    let window = windows.single_mut();
+    let win_w = window.height();
+    let win_h = window.height();
+
+    //  添加 WinSize 资源
+    commands.insert_resource(resource::WinSize { w: win_w, h: win_h });
+
+    // 添加 GameTextures
+    let images = resource::GameImages {
+        broad: asset_server.load(resource::asset::IMAGE_BROAD),
+    };
+
+    let sounds = resource::GameSound {
+        click: asset_server.load(resource::asset::SOUND_CLICK),
+    };
+
+
+    // 棋盘背景图片
+    commands.spawn(SpriteBundle {
+        texture: images.broad.clone(),
+        sprite: Sprite {
+            custom_size: Some(Vec2 { x: 521., y: 577. }),
+            ..Default::default()
+        },
+        transform: Transform::from_scale(Vec3::new(1.0, 1.0, 1.0)),
+        ..Default::default()
+    });
+
+    commands.insert_resource(sounds);
+    commands.insert_resource(images);
 }
