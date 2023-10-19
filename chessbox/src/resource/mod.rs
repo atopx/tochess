@@ -6,9 +6,7 @@ use bevy::prelude::{AudioSource, Component, Font, Handle, Image, Resource, State
 pub struct Player(Entity);
 
 #[derive(Resource)]
-pub struct Game {
-
-}
+pub struct Game {}
 
 
 /// 游戏窗口大小资源
@@ -29,6 +27,12 @@ pub struct GameImages {
 pub struct GameSound {
     pub click: Handle<AudioSource>,
 }
+
+#[derive(Resource)]
+pub struct GameFont {
+    pub wenkai: Handle<Font>,
+}
+
 
 /// 游戏状态
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]

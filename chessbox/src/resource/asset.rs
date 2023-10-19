@@ -6,38 +6,43 @@ pub const FONT_WENKAI: &str = "font/wenkai.ttf";
 pub const SOUND_MUSIC: &str = "sound/music.mp3";
 
 /// - 声音: todo 位置
-pub const SOUND_CHECK: &str = "sound/music.mp3";
+pub const SOUND_CHECK: &str = "sound/check.mp3";
 
 /// - 声音: 吃子
-pub const SOUND_CAPTURE: &str = "sound/music.mp3";
+pub const SOUND_CAPTURE: &str = "sound/capture.mp3";
 
 /// - 声音: 选子
-pub const SOUND_CLICK: &str = "sound/music.mp3";
+pub const SOUND_CLICK: &str = "sound/click.mp3";
 
 /// - 声音: todo 未知
-pub const SOUND_DRAW: &str = "sound/music.mp3";
+pub const SOUND_DRAW: &str = "sound/draw.mp3";
 
 /// - 声音: 无效
-pub const SOUND_INVALID: &str = "sound/music.mp3";
+pub const SOUND_INVALID: &str = "sound/invalid.mp3";
 
 /// - 声音: 失败
-pub const SOUND_LOSE: &str = "sound/music.mp3";
+pub const SOUND_LOSE: &str = "sound/lose.mp3";
 
 /// - 声音: 胜利
-pub const SOUND_WIN: &str = "sound/music.mp3";
+pub const SOUND_WIN: &str = "sound/win.mp3";
 
 /// - 声音: 提示
-pub const SOUND_TIPS: &str = "sound/music.mp3";
+pub const SOUND_TIPS: &str = "sound/tips.mp3";
 
 /// - 声音: 落子
-pub const SOUND_MOVE: &str = "sound/music.mp3";
+pub const SOUND_MOVE: &str = "sound/move.mp3";
 
 /// - 声音: 悔棋
-pub const SOUND_REGRET: &str = "sound/music.mp3";
+pub const SOUND_REGRET: &str = "sound/regret.mp3";
+
 
 /// - 图片: 棋盘
 pub const IMAGE_BROAD: &str = "image/broad.png";
-pub const IMAGE_BRG: &str = "image/background.png";
+pub const IMAGE_BACKGROUND: &str = "image/background.png";
+
+pub const IMAGE_MEI: &str = "image/mei.png";
+pub const IMAGE_ZHU: &str = "image/zhu.png";
+
 
 /// - 图片: 黑士
 pub const IMAGE_BA: &str = "image/chess/BA.png";

@@ -1,7 +1,6 @@
 use bevy::{prelude::{Resource, Component, States}, time::{Timer, TimerMode}};
 
 
-
 /// 棋子
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Pieces {
@@ -51,3 +50,13 @@ pub struct Piece {
     pub piece_type: Pieces,
     pub color: PieceColor,
 }
+
+/// 分数显示组件
+#[derive(Component)]
+pub struct DisplayScore;
+
+#[derive(Component)]
+pub struct OptionAI;
+
+#[derive(Component)]
+pub struct OptionAI;
